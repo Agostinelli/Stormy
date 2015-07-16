@@ -1,10 +1,12 @@
-package com.next.stormy;
+package com.next.stormy.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+
+import com.next.stormy.R;
 
 /**
  * Created by manfredi on 15/07/15.
