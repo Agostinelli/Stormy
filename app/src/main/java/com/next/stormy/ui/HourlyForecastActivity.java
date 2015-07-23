@@ -6,14 +6,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.next.stormy.R;
 import com.next.stormy.adapters.HourAdapter;
 import com.next.stormy.weather.Hour;
 
-import java.util.ArrayDeque;
 import java.util.Arrays;
 
 import butterknife.Bind;

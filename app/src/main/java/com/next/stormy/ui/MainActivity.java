@@ -74,6 +74,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mProgressBar.setVisibility(View.INVISIBLE);
 
         toggleRefresh();
+
         buildGoogleApiClient();
         mGoogleApiClient.connect();
 
@@ -312,6 +313,13 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(this,getString(R.string.connection_failed),Toast.LENGTH_SHORT).show();
+
+        toggleRefresh();
+
+        mLatitude = 37.8267;
+        mLongitude = -122.423;
+
+        getForecast(mLatitude, mLongitude);
     }
 
     @Override
@@ -320,6 +328,7 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
         mLatitude = location.getLatitude();
         mLongitude = location.getLongitude();
+
         toggleRefresh();
         getForecast(mLatitude, mLongitude);
 
