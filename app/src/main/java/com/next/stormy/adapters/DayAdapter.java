@@ -1,6 +1,7 @@
 package com.next.stormy.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,7 +9,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.next.stormy.Locality;
 import com.next.stormy.R;
+import com.next.stormy.ui.MainActivity;
 import com.next.stormy.weather.Day;
 
 /**
@@ -49,6 +52,7 @@ public class DayAdapter extends BaseAdapter {
             holder.iconImageView = (ImageView) convertView.findViewById(R.id.iconImageView);
             holder.temperatureLabel = (TextView) convertView.findViewById(R.id.temperatureLabel);
             holder.dayLabel = (TextView) convertView.findViewById(R.id.dayNameLabel);
+            holder.locatioLabel = (TextView) convertView.findViewById(R.id.locationLabel);
 
             convertView.setTag(holder);
         }
@@ -59,7 +63,20 @@ public class DayAdapter extends BaseAdapter {
         Day day = mDays[position];
 
         holder.iconImageView.setImageResource(day.getIconId());
+
+
+
+
+
         holder.temperatureLabel.setText(day.getTemperatureMax() + "");
+
+        if (Locality.getInstance().getAdminArea() != null) {
+            holder.locatioLabel.setText(Locality.getInstance().getCity() + ", " + Locality.getInstance().getAdminArea());
+        }
+        else {
+            holder.locatioLabel.setText(Locality.getInstance().getCity());
+        }
+
 
         if (position == 0) {
             holder.dayLabel.setText("Today");
@@ -75,5 +92,6 @@ public class DayAdapter extends BaseAdapter {
         ImageView iconImageView; // public by default
         TextView temperatureLabel;
         TextView dayLabel;
+        TextView locatioLabel;
     }
 }

@@ -1,8 +1,11 @@
 package com.next.stormy.ui;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -20,7 +23,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.next.stormy.Locality;
 import com.next.stormy.R;
+import com.next.stormy.adapters.DayAdapter;
 import com.next.stormy.weather.Current;
 import com.next.stormy.weather.Day;
 import com.next.stormy.weather.Forecast;
@@ -36,6 +41,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -55,7 +62,10 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     private Location mLastLocation;
     private double mLatitude;
     private double mLongitude;
+    public String mCity;
+    private String mAdminArea;
 
+    @Bind(R.id.locationLabel) TextView mLocationLabel;
     @Bind(R.id.timeLabel) TextView mTimeLabel;
     @Bind(R.id.temperatureLabel) TextView mTemperatureLabel;
     @Bind(R.id.humidityValue) TextView mHumidityValue;
@@ -79,10 +89,10 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mGoogleApiClient.connect();
 
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                 getForecast(mLatitude, mLongitude);
-                }
+            }
         });
     }
 
@@ -329,6 +339,8 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mLatitude = location.getLatitude();
         mLongitude = location.getLongitude();
 
+        getLocationName(mLatitude, mLongitude);
+
         toggleRefresh();
         getForecast(mLatitude, mLongitude);
 
@@ -337,4 +349,37 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
     }
+
+    private void getLocationName(Double latitude, Double longitude) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude,
+                    longitude, 1);
+
+            if (addresses != null) {
+                Address address = addresses.get(0);
+                mCity = address.getLocality();
+                Locality.getInstance().setCity(mCity);
+                mAdminArea = address.getAdminArea();
+                Locality.getInstance().setAdminArea(mAdminArea);
+
+
+                if (mAdminArea != null) {
+                    mLocationLabel.setText(mCity + ", " + mAdminArea);
+                }
+                else {
+                    mLocationLabel.setText(mCity);
+                }
+            }
+            else {
+                mLocationLabel.setText("No Locality Founded!");
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            mLocationLabel.setText("Cannot get Locality!");
+        }
+    }
 }
+
+
