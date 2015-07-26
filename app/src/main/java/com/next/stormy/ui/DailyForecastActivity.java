@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,9 +27,12 @@ import butterknife.ButterKnife;
 
 public class DailyForecastActivity extends Activity {
     private Day[]  mDays;
+    public String mCity;
+    public String mAdminArea;
 
     @Bind(android.R.id.list) ListView mListView;
     @Bind(android.R.id.empty) TextView mEmptyTextView;
+    @Bind(R.id.localityLabel) TextView mLocalityLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +42,16 @@ public class DailyForecastActivity extends Activity {
 
         Intent intent = getIntent();
         Parcelable[] parcelables = intent.getParcelableArrayExtra(MainActivity.DAILY_FORECAST);
+        mCity = intent.getStringExtra("CITY");
+        mAdminArea = intent.getStringExtra("ADMIN_AREA");
         mDays = Arrays.copyOf(parcelables, parcelables.length, Day[].class);
+
+        if (mAdminArea != null) {
+            mLocalityLabel.setText(mCity + ", " + mAdminArea);
+        }
+        else {
+            mLocalityLabel.setText(mCity);
+        }
 
         DayAdapter adapter = new DayAdapter(this, mDays);
         mListView.setAdapter(adapter);

@@ -47,7 +47,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Alcatraz Island, CA"
-        android:id="@+id/locationLabel"
+        android:id="@+id/localityLabel"
         android:textColor="#ffffff"
         android:textSize="18sp"
         android:layout_alignParentBottom="true"
