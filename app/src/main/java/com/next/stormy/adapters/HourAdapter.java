@@ -12,7 +12,6 @@ import android.widget.Toast;
 import com.next.stormy.R;
 import com.next.stormy.weather.Hour;
 
-import butterknife.Bind;
 
 /**
  * Created by manfredi on 17/07/15.

@@ -2,11 +2,11 @@ package com.next.stormy.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.ActionBarActivity;
@@ -81,16 +81,14 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mProgressBar.setVisibility(View.INVISIBLE);
 
 
-        toggleRefresh();
 
-        if (isNetworkAvailable()) {
-            buildGoogleApiClient();
+        if (isNetworkAvailable() && isPositionAvailable()) {
+            buildGoogleApiClient(); // get location -> getForecast
             mGoogleApiClient.connect();
         }
         else {
             Toast.makeText(this, getString(R.string.network_unavailable_message),
                     Toast.LENGTH_LONG).show();
-            toggleRefresh();
             mLocationLabel.setText("No connection!");
             mSummaryLabel.setText("...");
 
@@ -99,15 +97,24 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getForecast(mLatitude, mLongitude);
-                buildGoogleApiClient();
-                mGoogleApiClient.connect();
+                if (mCity != null) {
+                    getForecast(mLatitude, mLongitude);
+                }
+                else if (isNetworkAvailable() && isPositionAvailable()) {
+                    buildGoogleApiClient();
+                    mGoogleApiClient.connect();
+                    getForecast(mLatitude, mLongitude);
+                }
+                else {
+                    Toast.makeText(MainActivity.this, getString(R.string.network_unavailable_message),
+                            Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
 
     @Override
-     protected void onPause(){
+    protected void onPause(){
         super.onPause();
         if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -295,21 +302,34 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
 
     @OnClick (R.id.dailyButton)
     public void startDailyActivity(View view) {
-        Intent intent = new Intent(this, DailyForecastActivity.class);
-        intent.putExtra(DAILY_FORECAST, mForecast.getDailyForecast());
-        intent.putExtra("CITY", mCity);
-        intent.putExtra("ADMIN_AREA", mAdminArea);
-        startActivity(intent);
+        if (isNetworkAvailable() && isPositionAvailable()) {
+            Intent intent = new Intent(this, DailyForecastActivity.class);
+            intent.putExtra(DAILY_FORECAST, mForecast.getDailyForecast());
+            intent.putExtra("CITY", mCity);
+            intent.putExtra("ADMIN_AREA", mAdminArea);
+            startActivity(intent);
+        }
+        else {
+            Toast.makeText(MainActivity.this, getString(R.string.network_unavailable_message),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     @OnClick(R.id.hourlyButton)
     public void startHourlyActivity(View view) {
-        Intent intent = new Intent(this, HourlyForecastActivity.class);
-        intent.putExtra(HOURLY_FORECAST, mForecast.getHourlyForecast());
-        startActivity(intent);
+        if (isNetworkAvailable() && isPositionAvailable()) {
+            Intent intent = new Intent(this, HourlyForecastActivity.class);
+            intent.putExtra(HOURLY_FORECAST, mForecast.getHourlyForecast());
+            startActivity(intent);
+        }
+        else {
+            Toast.makeText(MainActivity.this, getString(R.string.network_unavailable_message),
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
     protected synchronized void buildGoogleApiClient() {
+        toggleRefresh();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -335,13 +355,6 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(this,getString(R.string.connection_failed),Toast.LENGTH_SHORT).show();
-
-        toggleRefresh();
-
-        mLatitude = 37.8267;
-        mLongitude = -122.423;
-
-        getForecast(mLatitude, mLongitude);
     }
 
     @Override
@@ -390,6 +403,24 @@ public class MainActivity extends ActionBarActivity implements GoogleApiClient.C
             mLocationLabel.setText("Cannot get Locality!");
         }
     }
+
+    private boolean isPositionAvailable() {
+        LocationManager manager = (LocationManager)
+                getSystemService(Context.LOCATION_SERVICE);
+        boolean gpsEnabled = false;
+        boolean networkEnabled = false;
+
+        try {
+            gpsEnabled = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        try {
+            networkEnabled = manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        return gpsEnabled || networkEnabled;
+    }
 }
+
 
 
